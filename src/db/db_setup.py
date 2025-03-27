@@ -30,7 +30,7 @@ class AppContext:
                 
                 # Reconnect
                 self.conn = sqlite3.connect(self.db_path)
-                #self.engine = create_engine(f"sqlite:///{self.db_path}")
+                self.engine = create_engine(f"sqlite:///{self.db_path}")
                 self._last_modified = current_modified
                 return True
             return False
