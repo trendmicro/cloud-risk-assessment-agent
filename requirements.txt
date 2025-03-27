@@ -1,5 +1,5 @@
 pydantic==2.10.1
-chainlit==2.0.3
+chainlit==2.4.3
 langchain==0.3.14
 langgraph==0.2.62
 prettytable==3.12.0

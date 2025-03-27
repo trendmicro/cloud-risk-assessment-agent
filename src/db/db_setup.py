@@ -30,7 +30,7 @@ class AppContext:
                 
                 # Reconnect
                 self.conn = sqlite3.connect(self.db_path)
-                self.engine = create_engine(f"sqlite:///{self.db_path}")
+                #self.engine = create_engine(f"sqlite:///{self.db_path}")
                 self._last_modified = current_modified
                 return True
             return False
@@ -70,10 +70,10 @@ def setup_database_connections():
 
         # Create storage client for PostgreSQL
         app_context.storage_client = PostgreSQLStorageClient(database_url=f"postgresql://{conn_str}")
-
+        conn_str = f"sqlite+aiosqlite:///{app_context.db_path}"
         # Set up data layer
         cl_data._data_layer = SQLAlchemyDataLayer(
-            conninfo=f"postgresql+asyncpg://{conn_str}",
+            conninfo=conn_str,
             storage_provider=app_context.storage_client
         )
 
