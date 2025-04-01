@@ -9,7 +9,7 @@ import json
 import sqlite3
 
 # Import from config module
-from src.db.config import RESULTS_TABLE_SCHEMA, SAMPLE_DATA, DEFAULT_DB_PATH
+from src.db.config import RESULTS_TABLE_SCHEMA, CHAT_HISTORY_TABLE_SCHEMA, SAMPLE_DATA, DEFAULT_DB_PATH
 
 # Define the base class for declarative models
 Base = declarative_base()
@@ -59,7 +59,15 @@ def ensure_directory_exists(db_path):
         print(f"Creating directory: {db_dir}")
         os.makedirs(db_dir, exist_ok=True)
 
-async def init_db_with_raw_sql(db_path):
+def _init_db_sync(db_path, sql_script):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.executescript(sql_script)
+    conn.commit()
+    conn.close()
+
+async def init_db_with_raw_sql(db_path, sql_script):
+
     """
     Initialize the database using raw SQL (async version).
     
@@ -70,17 +78,9 @@ async def init_db_with_raw_sql(db_path):
         # Connect to (or create) SQLite database
         print(f"Using raw SQL method with DB PATH: {db_path}")
         
-        # Need to use synchronous SQLite here, so we'll run it in a thread
-        def _init_db_sync():
-            conn = sqlite3.connect(db_path)
-            cursor = conn.cursor()
-            cursor.executescript(RESULTS_TABLE_SCHEMA)
-            conn.commit()
-            conn.close()
-        
         # Run the synchronous function in a thread to avoid blocking
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, _init_db_sync)
+        await loop.run_in_executor(None, _init_db_sync, db_path, sql_script)
         
         print("Tables created successfully using raw SQL")
         return True
@@ -116,7 +116,7 @@ async def init_db(db_path=DEFAULT_DB_PATH):
         print(f"Error creating tables with SQLAlchemy: {e}")
         
         # Fallback to raw SQL as a backup method
-        return await init_db_with_raw_sql(db_path)
+        return await init_db_with_raw_sql(db_path, RESULTS_TABLE_SCHEMA)
 
 async def init_sample(db_path=DEFAULT_DB_PATH):
     """

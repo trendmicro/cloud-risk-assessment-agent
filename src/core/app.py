@@ -463,23 +463,29 @@ async def set_starters():
 async def on_chat_resume(thread):
     cl.user_session.set("chat_history", [])
 
-    if thread.get("metadata") is not None and thread["metadata"].get("chat_history") is not None:
-        state_messages = []
-        chat_history = thread["metadata"]["chat_history"]
-        for message in chat_history:
-            cl.user_session.get("chat_history").append(message)
-            if message["role"] == "user":
-                state_messages.append(HumanMessage(content=message["content"]))
-            else:
-                state_messages.append(AIMessage(content=message["content"]))
+    if thread.get("metadata") is not None:
+        metadata = thread["metadata"]
+        # check type of metadata of the thread, if it is a string, convert it to a dictionary
+        if isinstance(metadata, str):
+            metadata = json.loads(metadata)
+        
+        if metadata.get("chat_history") is not None:
+            state_messages = []
+            chat_history = metadata["chat_history"]
+            for message in chat_history:
+                cl.user_session.get("chat_history").append(message)
+                if message["role"] == "user":
+                    state_messages.append(HumanMessage(content=message["content"]))
+                else:
+                    state_messages.append(AIMessage(content=message["content"]))
 
-        thread_id = thread["id"]
-        config = {"configurable": {"thread_id": thread_id}}
-        state = graph.get_state(config).values
-        #print(f'on_chat_resume: state = ', state)
-        if "messages" not in state:
-            state["messages"] = state_messages
-            graph.update_state(config, state)
+            thread_id = thread["id"]
+            config = {"configurable": {"thread_id": thread_id}}
+            state = graph.get_state(config).values
+            if "messages" not in state:
+                state["messages"] = state_messages
+                graph.update_state(config, state)
+
 
 
 cust_router = APIRouter()
