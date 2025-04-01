@@ -3,13 +3,13 @@ import argparse
 import sys
 import os
 import asyncio
-from src.db.config import DEFAULT_DB_PATH
+from src.db.config import DEFAULT_DB_PATH, CHAT_HISTORY_TABLE_SCHEMA
 
 # Add the parent directory to sys.path to be able to import from src
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the async initialization function from db_util
-from src.db.db_util import init_sample, init_db
+from src.db.db_util import init_sample, init_db, init_db_with_raw_sql
 
 async def async_main():
     parser = argparse.ArgumentParser(description="Initialize a database")
@@ -18,6 +18,8 @@ async def async_main():
 
     # Call the async init_sample function
     success = await init_db(args.db_path)
+
+    success &= await init_db_with_raw_sql(args.db_path, CHAT_HISTORY_TABLE_SCHEMA)
     
     if success:
         print(f"Successfully initialized database with sample data at {args.db_path}")
