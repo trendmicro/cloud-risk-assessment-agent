@@ -10,6 +10,8 @@ services:
   agent:
     build: .
     env_file: ".env"
+    environment:
+      - OPENAI_API_KEY
     ports:
       - "80:8000"
     volumes:
