@@ -26,7 +26,7 @@ SYSTEM_PROMPT = read_file_prompt("./src/prompts/report_system_prompt.txt")
 #-------------------------------
 # Node Functions
 #-------------------------------
-async def classify_user_intent(state: AgentState):
+async def classify_user_intent(state: AgentState) -> Command:
     """
     Classify the user's query as either a report request or a regular question.
     """
@@ -71,7 +71,7 @@ async def classify_user_intent(state: AgentState):
                 goto="reason"
             )
         
-async def generate_summary_report(state: AgentState):
+async def generate_summary_report(state: AgentState) -> object:
     """Generate a summary report based on the specified category"""
     print("--------------do_summary---------------")
     category = state["category"]
@@ -118,7 +118,7 @@ async def generate_summary_report(state: AgentState):
         "messages": [response]
     }
 
-async def generate_insights(state: AgentState):
+async def generate_insights(state: AgentState) -> object:
     """Generate insights based on the top 5 results"""
     print("--------------do_insight---------------")
     result = state["top5"]
@@ -142,7 +142,7 @@ async def generate_insights(state: AgentState):
 
     return {"messages": [response]}
 
-async def finalize_conclusion(state: AgentState):
+async def finalize_conclusion(state: AgentState) -> object:
     """Generate a conclusion based on the full results"""
     print("--------------do_conclude---------------")
     messages = state["messages"]
@@ -214,7 +214,7 @@ async def execute_db_query(state: AgentState) -> Command[Literal["reason"]]:
             goto="reason"
         )
 
-async def provide_explanation(state: AgentState):
+async def provide_explanation(state: AgentState) -> Command:
     """
     Generate an explanation based on query results
     """

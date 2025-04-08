@@ -1,6 +1,7 @@
 import os
 import tiktoken
-from langchain.chat_models import init_chat_model, BaseChatModel
+from langchain_core.language_models.chat_models import BaseChatModel
+from langchain.chat_models import init_chat_model
 from langchain.prompts import PromptTemplate
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
 
