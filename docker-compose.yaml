@@ -10,6 +10,10 @@ services:
   agent:
     build: .
     env_file: ".env"
+    environment:
+      - OPENAI_API_KEY
+      - CONDUCTOR_AUTH_KEY
+      - CONDUCTOR_AUTH_SECRET
     ports:
       - "80:8000"
     volumes:
