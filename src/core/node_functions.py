@@ -2,9 +2,9 @@ from typing import Literal
 import json
 
 # Langchain imports
-from langgraph.types import Command
-from langchain_core.prompts import PromptTemplate
-from langchain_core.messages import HumanMessage, SystemMessage
+from langgraph.types import Command # type: ignore
+from langchain_core.prompts import PromptTemplate # type: ignore
+from langchain_core.messages import HumanMessage, SystemMessage # type: ignore
 
 # Local imports
 from src.utils.utils import token_count, read_prompt, read_file_prompt, messages_token_count, load_chat_model, get_latest_human_message, reasoning_prompt, parse_report_command

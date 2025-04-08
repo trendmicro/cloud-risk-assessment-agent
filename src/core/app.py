@@ -1,24 +1,24 @@
 from io import StringIO
 from typing import Dict, Optional
-import pandas as pd
+import pandas as pd # type: ignore
 
 # LangChain imports
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage
-from langgraph.graph import StateGraph, END, START
-from langgraph.checkpoint.memory import MemorySaver
-from langchain.schema.runnable.config import RunnableConfig
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage # type: ignore
+from langgraph.graph import StateGraph, END, START # type: ignore
+from langgraph.checkpoint.memory import MemorySaver # type: ignore
+from langchain.schema.runnable.config import RunnableConfig # type: ignore
 
 # Chainlit imports
-import chainlit as cl
+import chainlit as cl # type: ignore
 
 # Local imports
 from src.core.agent_state import AgentState
 from src.core.node_functions import classify_user_intent, execute_db_query, generate_summary_report, generate_insights, finalize_conclusion, provide_explanation, invoke_llm
 
 # Custom API
-from fastapi import HTTPException, Response, APIRouter
-from chainlit.server import app
-from starlette.routing import BaseRoute, Route
+from fastapi import HTTPException, Response, APIRouter # type: ignore
+from chainlit.server import app # type: ignore
+from starlette.routing import BaseRoute, Route # type: ignore
 
 checkpointer=MemorySaver()
 
