@@ -36,8 +36,8 @@ builder.add_node("insight", generate_insights)
 builder.add_node("conclude", finalize_conclusion)
 builder.add_node("reason", provide_explanation)
 
-# define the node which will display the resoning result on web
-REASONING_NODE = ["reason", "summary", "insight", "assessment", "remediation", "effort", "conclude"]
+# define the node which will display the reasoning result on web
+REASONING_NODE = ["reason", "summary", "insight", "conclude"]
 
 builder.add_edge(START, "intent")
 builder.add_edge("summary", "insight")
