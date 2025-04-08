@@ -14,6 +14,7 @@ import chainlit as cl # type: ignore
 # Local imports
 from src.core.agent_state import AgentState
 from src.core.node_functions import classify_user_intent, execute_db_query, generate_summary_report, generate_insights, finalize_conclusion, provide_explanation, invoke_llm
+from src.db.db_setup import setup_database_connections
 
 # Custom API
 from fastapi import HTTPException, Response, APIRouter # type: ignore
@@ -21,21 +22,6 @@ from chainlit.server import app # type: ignore
 from starlette.routing import BaseRoute, Route # type: ignore
 
 checkpointer=MemorySaver()
-
-#-------------------------------
-# Database Configuration
-#-------------------------------
-from src.db.db_setup import setup_database_connections
-
-app_context = setup_database_connections()
-
-#-------------------------------
-# Chainlit Authentication
-#-------------------------------
-@cl.header_auth_callback
-def header_auth_callback(headers: Dict) -> Optional[cl.User]:
-    """Authenticate users via header information"""
-    return cl.User(identifier="admin", metadata={"role": "admin", "provider": "header"})
 
 #-------------------------------
 # Graph node
@@ -64,6 +50,14 @@ builder.add_edge("reason", END)
 graph = builder.compile(
 checkpointer=checkpointer
 )
+
+#-------------------------------
+# Chainlit Authentication
+#-------------------------------
+@cl.header_auth_callback
+def header_auth_callback(headers: Dict) -> Optional[cl.User]:
+    """Authenticate users via header information"""
+    return cl.User(identifier="admin", metadata={"role": "admin", "provider": "header"})
 
 #-------------------------------
 # chainlit workflow
@@ -165,7 +159,7 @@ async def on_chat_resume(thread):
 
 
 cust_router = APIRouter()
-
+app_context = setup_database_connections()
 @cust_router.get("/blob/{object_key}")
 async def serve_blob_file(
     object_key: str
