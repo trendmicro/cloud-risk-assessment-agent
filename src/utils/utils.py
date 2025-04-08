@@ -30,9 +30,7 @@ def token_count(text, model_name="gpt-4o"):
 def read_prompt(state: str) -> str:
     try:
         file_path = f"./src/prompts/{state}_prompt.txt"
-        with open(file_path, 'r', encoding='utf-8') as file:
-            content = file.read()
-        return content
+        return read_file_prompt(file_path)
     except Exception as e:
         print(f"Error reading file {file_path}: {e}")
         return ""
