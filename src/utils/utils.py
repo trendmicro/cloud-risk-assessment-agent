@@ -59,3 +59,29 @@ def get_last_k_human_messages(messages, k=1):
 
 def get_latest_human_message(messages):
     return get_last_k_human_messages(messages, 1)[0].content
+
+def parse_report_command(input_string: str) -> str:
+    """
+    Parse a /report command and extract the category.
+    Raises ValueError for invalid input.
+    """
+    command_prefix = "/report "
+
+    VALID_REPORT_CATEGORIES = {"code", "container", "aws", "kubernetes", "all"}
+    
+    if not input_string.startswith(command_prefix):
+        raise ValueError("Input does not start with '/report'.")
+        
+    # Extract the argument after the prefix
+    argument = input_string[len(command_prefix):].strip()
+    
+    if not argument:
+        raise ValueError("No argument provided after '/report'.")
+        
+    if argument not in VALID_REPORT_CATEGORIES:
+        raise ValueError(
+            f"Invalid argument '{argument}'. Allowed arguments are "
+            f"{', '.join(VALID_REPORT_CATEGORIES)}."
+        )
+        
+    return argument
