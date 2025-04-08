@@ -1,31 +1,26 @@
 from io import StringIO
+from typing import Dict, Optional, Literal
 import json
-import os
-from typing import Dict, Literal, Optional
 import pandas as pd
-import sqlite3
 
 # LangChain imports
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.prompts import PromptTemplate
 from langgraph.graph import StateGraph, END, START
 from langgraph.types import Command
-from langgraph.graph.message import MessagesState
 from langgraph.checkpoint.memory import MemorySaver
 from langchain.schema.runnable.config import RunnableConfig
 
 # Chainlit imports
 import chainlit as cl
-import chainlit.data as cl_data
-from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 
 # Local imports
 from src.utils.utils import token_count, read_prompt, read_file_prompt, messages_token_count, load_chat_model, get_latest_human_message, reasoning_prompt
 from src.db.db_query import generate_query, is_valid_query, query_summary
+from src.core.agent_state import AgentState
 
 # Custom API
-from fastapi import FastAPI, HTTPException, Request, Response, APIRouter
-from starlette.responses import StreamingResponse
+from fastapi import HTTPException, Response, APIRouter
 from chainlit.server import app
 from starlette.routing import BaseRoute, Route
 
@@ -58,19 +53,7 @@ def header_auth_callback(headers: Dict) -> Optional[cl.User]:
     """Authenticate users via header information"""
     return cl.User(identifier="admin", metadata={"role": "admin", "provider": "header"})
 
-#-------------------------------
-# State Definition
-#-------------------------------
-class AgentState(MessagesState):
-    """State maintained throughout the agent's workflow"""
-    intention: Optional[str] = None
-    user_query: Optional[str] = None
-    sql_query: Optional[str] = None
-    query_results: Optional[str] = None
-    category: Optional[str] = None
-    result_text: Optional[str] = None
-    top5: Optional[str] = None
-    dataframe: Optional[str] = None
+
 
 
 
