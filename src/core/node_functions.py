@@ -71,12 +71,6 @@ async def classify_user_intent(state: AgentState):
                 goto="reason"
             )
         
-async def invoke_llm(state: AgentState):
-    messages = state["messages"]
-    response = await model.ainvoke(messages)
-    # We return a list, because this will get added to the existing list
-    return {"messages": [response]}
-
 async def generate_summary_report(state: AgentState):
     """Generate a summary report based on the specified category"""
     print("--------------do_summary---------------")

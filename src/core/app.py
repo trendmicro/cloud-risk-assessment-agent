@@ -13,7 +13,7 @@ import chainlit as cl # type: ignore
 
 # Local imports
 from src.core.agent_state import AgentState
-from src.core.node_functions import classify_user_intent, execute_db_query, generate_summary_report, generate_insights, finalize_conclusion, provide_explanation, invoke_llm
+from src.core.node_functions import classify_user_intent, execute_db_query, generate_summary_report, generate_insights, finalize_conclusion, provide_explanation
 from src.db.db_setup import setup_database_connections
 
 # Custom API
@@ -35,10 +35,9 @@ builder.add_node("summary", generate_summary_report)
 builder.add_node("insight", generate_insights)
 builder.add_node("conclude", finalize_conclusion)
 builder.add_node("reason", provide_explanation)
-builder.add_node("report", invoke_llm)
 
 # define the node which will display the resoning result on web
-REASONING_NODE = ["reason", "report", "summary", "insight", "assessment", "remediation", "effort", "conclude"]
+REASONING_NODE = ["reason", "summary", "insight", "assessment", "remediation", "effort", "conclude"]
 
 builder.add_edge(START, "intent")
 builder.add_edge("summary", "insight")
