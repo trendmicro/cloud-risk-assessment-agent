@@ -21,8 +21,6 @@ Add the following content:
 OPENAI_API_BASE=https://dev.cybertron.ailab.trendops.co
 OPENAI_API_KEY={API Key from AILAB}
 OPENAI_MODEL=Primus-Christmas-128k
-POSTGRES_USER=tmcybertron
-POSTGRES_PASSWORD=tmcybertron
 SERVICE_HOST=http://localhost
 
 # AWS credentials for scanning AWS resources

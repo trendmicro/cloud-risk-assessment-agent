@@ -17,17 +17,11 @@ docker compose up -d
 Export the necessary environment variables, overriding those in the .env file:
 
 ```bash
-export POSTGRES_HOST="localhost"
 export SERVICE_HOST=http://localhost:8000
 export TIKTOKEN_CACHE_DIR=./cache
 export PYTHONPATH=`pwd`
 export CHAINLIT_AUTH_SECRET=`python scripts/chainlit_secret`
 ```
-
-### Alternative Database Configuration
-
-If you don't want to use PostgreSQL:
-- Remove `POSTGRES_USER` and `POSTGRES_PASSWORD` from your `.env` file
 
 ### Step 3: Set Up Python Environment
 

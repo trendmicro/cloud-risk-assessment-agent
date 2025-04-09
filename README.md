@@ -52,8 +52,6 @@ OPENAI_API_BASE="http://localhost:8000/"
 OPENAI_API_KEY="YOUR OPENAI API KEY"
 OPENAI_MODEL="Llama-Primus-Merged"
 SERVICE_HOST=http://localhost
-POSTGRES_USER=tmcybertron
-POSTGRES_PASSWORD=tmcybertron
 # If you want to scan AWS account, please provide the access key / token in environment file here.
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=

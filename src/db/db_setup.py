@@ -5,7 +5,6 @@ from sqlalchemy import create_engine
 import chainlit.data as cl_data
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.logger import logger
-from src.db.postgres_storage import PostgreSQLStorageClient
 from src.db.sqlite_storage import SQLiteStorageClient
 from src.db.config import DEFAULT_DB_PATH
 
@@ -52,31 +51,14 @@ def setup_database_connections():
     """
     Configure and return database connections based on environment
     """
-    # Determine if using PostgreSQL (from environment) or SQLite (fallback)
-    use_postgres = all([
-        os.getenv("POSTGRES_USER"),
-        os.getenv("POSTGRES_PASSWORD")
-    ])
 
     app_context = AppContext()
     # Initial connection
     app_context.check_and_reconnect()
 
-    if use_postgres:
-        # PostgreSQL setup
-        dbhost = os.getenv("POSTGRES_HOST", "db")
-        dbport = os.getenv("POSTGRES_PORT", "5432")
-        dbuser = os.getenv("POSTGRES_USER")
-        dbpassword = os.getenv("POSTGRES_PASSWORD")
-        db_str = f"{dbuser}:{dbpassword}@{dbhost}:{dbport}"
-
-        # Create storage client for PostgreSQL
-        conn_str=f"postgresql+asyncpg://{db_str}"
-        app_context.storage_client = PostgreSQLStorageClient(database_url=f"postgresql://{db_str}")
-    else:
-        # SQLite setup
-        conn_str = f"sqlite+aiosqlite:///{app_context.db_path}"
-        app_context.storage_client = SQLiteStorageClient(database_path=app_context.db_path)
+    # SQLite setup
+    conn_str = f"sqlite+aiosqlite:///{app_context.db_path}"
+    app_context.storage_client = SQLiteStorageClient(database_path=app_context.db_path)
     
     # Set up data layer
     logger.info(f"Using database connection: {conn_str}")
