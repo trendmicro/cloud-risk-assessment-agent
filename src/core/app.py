@@ -72,7 +72,6 @@ async def on_message(msg: cl.Message):
     chat_history.append({"role": "user", "content": msg.content})
     config = {"configurable": {"thread_id": msg.thread_id}}
 
-    cb = cl.LangchainCallbackHandler()
     final_answer = cl.Message(content="")
     
     async for msg, metadata in graph.astream({"messages": [HumanMessage(content=msg.content)]}, stream_mode="messages", config=RunnableConfig(callbacks=[], **config)):
@@ -156,25 +155,28 @@ async def on_chat_resume(thread):
             state["messages"] = state_messages
             graph.update_state(config, state)
 
+def main():
+    cust_router = APIRouter()
+    app_context = setup_database_connections()
+    @cust_router.get("/blob/{object_key}")
+    async def serve_blob_file(
+        object_key: str
+    ):
+        if app_context.storage_client is None:
+            raise HTTPException(status_code=500, detail="Storage client not initialized")
+        file_data = await app_context.storage_client.download_file(object_key)
+        
+        return Response(content=file_data, media_type="application/octet-stream")
 
-cust_router = APIRouter()
-app_context = setup_database_connections()
-@cust_router.get("/blob/{object_key}")
-async def serve_blob_file(
-    object_key: str
-):
-    if app_context.storage_client is None:
-        raise HTTPException(status_code=500, detail="Storage client not initialized")
-    file_data = await app_context.storage_client.download_file(object_key)
-    
-    return Response(content=file_data, media_type="application/octet-stream")
+    serve_route: list[BaseRoute] = [
+        r for r in app.router.routes if isinstance(r, Route) and r.name == "serve"
+    ]
 
-serve_route: list[BaseRoute] = [
-    r for r in app.router.routes if isinstance(r, Route) and r.name == "serve"
-]
+    for route in serve_route:
+        app.router.routes.remove(route)
 
-for route in serve_route:
-    app.router.routes.remove(route)
+    app.include_router(cust_router)
+    app.router.routes.extend(serve_route)
 
-app.include_router(cust_router)
-app.router.routes.extend(serve_route)
+if __name__ == '__main__':
+    main()
