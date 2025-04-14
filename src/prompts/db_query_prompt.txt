@@ -117,3 +117,5 @@ Use this schema and these examples as a reference to answer future questions.
 
 Question: {QUESTION}
 Please only query issues from {category} report.
+
+### Only respond with the SQL format specified. Do not include any additional text. ###

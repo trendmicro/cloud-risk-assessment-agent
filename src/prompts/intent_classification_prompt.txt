@@ -50,3 +50,5 @@ Answer:
     "Reason": "The question seeks clarification on a concept likely covered in the initial response, making a new database query unnecessary."
 }}
 Question: {question}
+
+### Only respond with the JSON format specified. Do not include any additional text. ###
