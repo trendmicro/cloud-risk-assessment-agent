@@ -1,4 +1,6 @@
 from typing import Dict, Optional
+import pandas as pd #type: ignore
+from io import StringIO
 
 # LangChain imports
 from langchain_core.messages import HumanMessage, AIMessage # type: ignore
@@ -35,13 +37,21 @@ async def on_chat_start():
 async def on_message(msg: cl.Message):
     chat_history = cl.user_session.get("chat_history")
     chat_history.append({"role": "user", "content": msg.content})
+    
+    query_result = cl.Message(content="")
+    
+    output = conductor.executeWorkflow("Cloud-Risk-Assessment-Agent", 1, {"query": msg.content})
+    
+    [result, insight, conclusion] = output["final_answer"].split(" + ")
 
-    final_answer = cl.Message(content="")
+    df = pd.read_csv(StringIO(result))
+    elements = [cl.Dataframe(data=df, display="inline", name="Dataframe")]
+    await cl.Message(content="Report Table:", elements=elements).send()
 
+    await query_result.stream_token(AIMessage(content=insight).content)
+    await query_result.stream_token(AIMessage(content=conclusion).content)
 
-            
-
-    await final_answer.send()
+    await query_result.send()
 
 @cl.set_starters
 async def set_starters():

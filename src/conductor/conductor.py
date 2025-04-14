@@ -1,10 +1,15 @@
 import os
 import asyncio
 
+from typing import Dict
+
 from conductor.client.automator.task_handler import TaskHandler # type: ignore
 from conductor.client.configuration.configuration import Configuration # type: ignore
 from conductor.client.configuration.settings.authentication_settings import AuthenticationSettings # type: ignore
 from conductor.client.worker.worker_task import worker_task #type: ignore
+from conductor.client.orkes_clients import OrkesClients #type: ignore
+from conductor.client.http.models import StartWorkflowRequest #type: ignore
+
 
 from src.db.db_setup import setup_database_connections
 from src.db.db_query import query_summary
@@ -12,6 +17,7 @@ from src.db.db_query import query_summary
 class ConductorManager:
     api_config = None
     task_handler = None
+    workflow_client = None
     
     def __init__(self):
         self.api_config = Configuration(
@@ -22,8 +28,10 @@ class ConductorManager:
             )
         )
 
-        print("Starting workers")
+        # Create workflow client for use
+        self.workflow_client = OrkesClients(configuration=self.api_config).get_workflow_client()
 
+        # Start the workers
         self.task_handler = TaskHandler(
             workers=[],
             configuration=self.api_config,
@@ -32,6 +40,19 @@ class ConductorManager:
         )
 
         self.task_handler.start_processes()
+
+    def executeWorkflow(self, name: str, version: int = 1, input: Dict[str,str] = {}):
+        request = StartWorkflowRequest()
+        request.name = name
+        request.version = version
+        request.input = input
+
+        workflow_run = self.workflow_client.execute_workflow(
+            start_workflow_request=request, 
+            wait_for_seconds=60)
+
+        return workflow_run.output
+        
         
 
     def __del__(self):
@@ -65,11 +86,3 @@ def query_summary_from_db(category:str):
     summary = summary_df.to_string(index=False)
     
     return {"result":result, "summary": summary, "top5": top5}
-
-@worker_task(task_definition_name='Generate_Insight')
-def generate_insight(top5:str):
-    return top5
-
-@worker_task(task_definition_name='Generate_Conclusion')
-def generate_conclusion(result:str):
-    return result
