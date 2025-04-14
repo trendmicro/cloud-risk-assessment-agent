@@ -15,6 +15,7 @@ import chainlit as cl # type: ignore
 from src.core.agent_state import AgentState
 from src.core.node_functions import classify_user_intent, execute_db_query, generate_summary_report, generate_insights, finalize_conclusion, provide_explanation
 from src.db.db_setup import setup_database_connections
+from src.conductor.conductor import ConductorManager
 
 # Custom API
 from fastapi import HTTPException, Response, APIRouter # type: ignore
@@ -155,28 +156,28 @@ async def on_chat_resume(thread):
             state["messages"] = state_messages
             graph.update_state(config, state)
 
-def main():
-    cust_router = APIRouter()
-    app_context = setup_database_connections()
-    @cust_router.get("/blob/{object_key}")
-    async def serve_blob_file(
-        object_key: str
-    ):
-        if app_context.storage_client is None:
-            raise HTTPException(status_code=500, detail="Storage client not initialized")
-        file_data = await app_context.storage_client.download_file(object_key)
-        
-        return Response(content=file_data, media_type="application/octet-stream")
 
-    serve_route: list[BaseRoute] = [
-        r for r in app.router.routes if isinstance(r, Route) and r.name == "serve"
-    ]
+cust_router = APIRouter()
+app_context = setup_database_connections()
+@cust_router.get("/blob/{object_key}")
+async def serve_blob_file(
+    object_key: str
+):
+    if app_context.storage_client is None:
+        raise HTTPException(status_code=500, detail="Storage client not initialized")
+    file_data = await app_context.storage_client.download_file(object_key)
+    
+    return Response(content=file_data, media_type="application/octet-stream")
 
-    for route in serve_route:
-        app.router.routes.remove(route)
+serve_route: list[BaseRoute] = [
+    r for r in app.router.routes if isinstance(r, Route) and r.name == "serve"
+]
 
-    app.include_router(cust_router)
-    app.router.routes.extend(serve_route)
+for route in serve_route:
+    app.router.routes.remove(route)
 
-if __name__ == '__main__':
-    main()
+app.include_router(cust_router)
+app.router.routes.extend(serve_route)
+
+#Start workers
+conductor = ConductorManager()

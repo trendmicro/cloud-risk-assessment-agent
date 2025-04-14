@@ -20,3 +20,4 @@ aiohttp==3.11.7
 asyncpg==0.30.0
 sqlparse==0.5.3
 prompt_toolkit==3.0.50
+conductor_python==1.1.10
