@@ -3,7 +3,7 @@ import os
 import re
 from langchain_openai import ChatOpenAI
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain.prompts import PromptTemplate
 import asyncio
 import sqlparse
@@ -15,9 +15,15 @@ from src.utils.utils import reasoning_prompt
 async def generate_query(q, category, model):
     try:
         content = reasoning_prompt("./src/prompts/db_query_prompt.txt", QUESTION=q, category=category)
-        local_messages = [HumanMessage(content=content)]
+        local_messages = [
+            SystemMessage(content="You are a SQL query generator. Respond only with a valid SQL query string, with no explanation or additional text. The output must be ready to run directly as a SQL command."),
+            HumanMessage(content=content)
+        ]
         response = await model.ainvoke(local_messages)
-        return response.content
+        #remove code delimiter if exist
+        sql = response.content
+        sql = sql.replace("```sql", "").replace("```", "")
+        return sql
     except Exception as e:
         print(f"Error generating query string for question: {q}. Error: {e}")
         return None
