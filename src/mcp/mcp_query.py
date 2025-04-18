@@ -1,9 +1,11 @@
+import os
 import asyncio
 import logging
 from aiohttp.client_exceptions import ClientError
 from mcp import ClientSession, types
 from mcp.client.sse import sse_client
-from src.mcp.config import MCP_HOST
+
+MCP_HOST = os.getenv("MCP_HOST", "")
 
 async def call_tool(tool_name: str, arguments: dict):
     try:
