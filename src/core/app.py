@@ -22,6 +22,7 @@ from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 # Local imports
 from src.utils.utils import token_count, read_prompt, read_file_prompt, messages_token_count, load_chat_model, get_latest_human_message, reasoning_prompt
 from src.db.db_query import generate_query, is_valid_query, query_summary
+from src.mcp.mcp_query import perform_semantic_search
 
 # Custom API
 from fastapi import FastAPI, HTTPException, Request, Response, APIRouter
@@ -312,16 +313,20 @@ async def provide_explanation(state: AgentState):
         if not user_query:
             user_query = get_latest_human_message(state["messages"])
 
+        mcp_result = await perform_semantic_search(user_query)
+        print(f"mcp_result = {mcp_result}\n\n")
+
         # Format the explanation prompt
         template = read_prompt("explanation")
         prompt = PromptTemplate(
             template=template,
-            input_variables=["question", "sql_query", "scan_results"]
+            input_variables=["question", "sql_query", "scan_results", "mcp_result"]
         )
         formatted_prompt = prompt.format(
             question=user_query, 
             sql_query=sql_query, 
-            scan_results=query_results
+            scan_results=query_results,
+            mcp_result=mcp_result
         )
         
         # Limit prompt size to prevent token overflow
