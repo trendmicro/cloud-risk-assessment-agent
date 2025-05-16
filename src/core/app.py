@@ -20,7 +20,7 @@ import chainlit.data as cl_data
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 
 # Local imports
-from src.utils.utils import token_count, read_prompt, read_file_prompt, messages_token_count, load_chat_model, get_latest_human_message, reasoning_prompt
+from src.utils.utils import token_count, read_prompt, read_file_prompt, messages_token_count, load_chat_model, get_latest_human_message, reasoning_prompt, trim_messages_to_max_tokens
 from src.db.db_query import generate_query, is_valid_query, query_summary
 
 # Custom API
@@ -307,6 +307,7 @@ async def provide_explanation(state: AgentState):
         user_query = state.get("user_query", "")
         sql_query = state.get("sql_query", "")
         query_results = state.get("query_results", "")
+        messages = state.get("messages", [])
 
         # If the user query is missing, default to the latest human message
         if not user_query:
@@ -328,8 +329,10 @@ async def provide_explanation(state: AgentState):
         if len(formatted_prompt) > 80000:
             formatted_prompt = formatted_prompt[:80000]
 
+        messages.append(HumanMessage(content=formatted_prompt))
+        messages = trim_messages_to_max_tokens(messages)
         # Get response from the model
-        explanation_response = await model.ainvoke([HumanMessage(content=formatted_prompt)])
+        explanation_response = await model.ainvoke(messages)
         
         # Clear state for next interaction
         return Command(
