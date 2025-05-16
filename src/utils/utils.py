@@ -59,3 +59,22 @@ def get_last_k_human_messages(messages, k=1):
 
 def get_latest_human_message(messages):
     return get_last_k_human_messages(messages, 1)[0].content
+
+def trim_messages_to_max_tokens(messages, model="gpt-4-turbo"):
+    """
+    Trims the input messages array so that the total token count is less than MAX_TOKEN_SIZE.
+    MAX_TOKEN_SIZE is read from the environment variable, defaulting to 128_000.
+    Messages are removed from the start (oldest) until the total token count is under the limit.
+
+    Args:
+        messages (list): List of message objects (e.g., HumanMessage, AIMessage, SystemMessage).
+        model (str): Model name for token counting (default: "gpt-4-turbo").
+
+    Returns:
+        list: Trimmed list of messages.
+    """
+    max_token_size = int(os.environ.get("MAX_TOKEN_SIZE", 128_000))
+    trimmed_messages = list(messages)
+    while messages_token_count(trimmed_messages, model=model) > max_token_size and len(trimmed_messages) > 1:
+        trimmed_messages.pop(0)  # Remove the oldest message
+    return trimmed_messages
