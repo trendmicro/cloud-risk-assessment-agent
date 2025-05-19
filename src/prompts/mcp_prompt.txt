@@ -1,0 +1,12 @@
+
+You have access to the following tools:
+{tools}
+
+- User Question: 
+{input}
+
+- SQL query used: 
+{sql_query}
+
+- Scan results: 
+{scan_results}
