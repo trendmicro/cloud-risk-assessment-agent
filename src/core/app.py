@@ -21,6 +21,7 @@ from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 
 # Local imports
 from src.utils.utils import token_count, read_prompt, read_file_prompt, messages_token_count, load_chat_model, get_latest_human_message, reasoning_prompt, trim_messages_to_max_tokens
+from src.utils.mcp import run_custom_mcp
 from src.db.db_query import generate_query, is_valid_query, query_summary
 
 # Custom API
@@ -140,14 +141,14 @@ async def classify_user_intent(state: AgentState):
             else:
                 return Command(
                     update={"intention": res, "user_query": None},
-                    goto="reason"
+                    goto="mcp"
                 )
         except json.JSONDecodeError:
             # Handle invalid JSON response
             print("Failed to parse intent classification response")
             return Command(
                 update={"user_query": query},
-                goto="reason"
+                goto="mcp"
             )
         
 async def invoke_llm(state: AgentState):
@@ -265,7 +266,7 @@ async def execute_db_query(state: AgentState) -> Command[Literal["reason"]]:
             print("Generated query is invalid or potentially unsafe.\n\n")
             return Command(
                 update={"user_query": user_query},
-                goto="reason"
+                goto="mcp"
             )
 
         # Execute the validated query
@@ -284,19 +285,19 @@ async def execute_db_query(state: AgentState) -> Command[Literal["reason"]]:
         print("Query results prepared.\n\n")
         return Command(
             update={
-                "user_query": user_query, 
-                "sql_query": generated_query, 
-                "query_results": results_str, 
+                "user_query": user_query,
+                "sql_query": generated_query,
+                "query_results": results_str,
                 "messages": messages + [SystemMessage(content="Query executed successfully.")]
             },
-            goto="reason"
+            goto="mcp"
         )
 
     except Exception as e:
         print(f"Error during query execution: {e}\n\n")
         return Command(
             update={"user_query": user_query},
-            goto="reason"
+            goto="mcp"
         )
 
 async def provide_explanation(state: AgentState):
@@ -357,6 +358,27 @@ async def provide_explanation(state: AgentState):
             }
         )
 
+async def apply_mcp(state: AgentState):
+    """Enrich messages using Chainlit MCP or a local fallback"""
+    messages = state["messages"]
+    latest = get_latest_human_message(messages)
+
+    enriched = None
+    try:
+        cl_mcp = getattr(cl, "mcp", None)
+        if cl_mcp and hasattr(cl_mcp, "run"):
+            enriched = await cl_mcp.run(latest)
+    except Exception as e:  # noqa: BLE001
+        print(f"Chainlit MCP failed: {e}")
+
+    if not enriched:
+        enriched = run_custom_mcp(latest)
+
+    if enriched:
+        messages.append(HumanMessage(content=enriched))
+
+    return {"messages": messages}
+
 
 #-------------------------------
 # Graph node
@@ -371,6 +393,7 @@ builder.add_node("insight", generate_insights)
 builder.add_node("conclude", finalize_conclusion)
 builder.add_node("reason", provide_explanation)
 builder.add_node("report", invoke_llm)
+builder.add_node("mcp", apply_mcp)
 
 # define the node which will display the resoning result on web
 REASONING_NODE = ["reason", "report", "summary", "insight", "assessment", "remediation", "effort", "conclude"]
@@ -378,9 +401,10 @@ REASONING_NODE = ["reason", "report", "summary", "insight", "assessment", "remed
 builder.add_edge(START, "intent")
 builder.add_edge("summary", "insight")
 builder.add_edge("insight", "conclude")
-builder.add_edge("querydb", "reason")
+builder.add_edge("querydb", "mcp")
 builder.add_edge("conclude", END)
 builder.add_edge("reason", END)
+builder.add_edge("mcp", "reason")
 
 graph = builder.compile(
 checkpointer=checkpointer
