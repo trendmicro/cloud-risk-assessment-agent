@@ -3,7 +3,14 @@ import json
 import os
 from importlib import resources
 from prettytable import PrettyTable
-from src.scan.util import run_command_and_read_output, NoOutputError, filter_severity, count_gpt_tokens, run_command_bg
+from src.scan.util import (
+    run_command_and_read_output,
+    NoOutputError,
+    filter_severity,
+    count_gpt_tokens,
+    run_command_bg,
+    JSONParseError,
+)
 import pandas as pd
 from tqdm import tqdm
 from langchain_openai import ChatOpenAI, AzureChatOpenAI
@@ -13,7 +20,7 @@ from langchain.prompts import PromptTemplate
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 import logging
 import uvicorn
-from cvss_score import generate_cvss, safe_cvss_score
+from src.scan.cvss_score import generate_cvss, safe_cvss_score
 
 logger = logging.getLogger('uvicorn.error')
 ISSUE_SCORING_PROMPT_PATH = "issue_scoring_prompt.txt"
@@ -30,7 +37,7 @@ def read_k8s_full_report():
         try:
             return json.load(file)
         except json.JSONDecodeError:
-            raise JSONParseError(output_file)
+            raise JSONParseError(K8S_REPORT_PATH)
 
 def k8s_resource_misconfigure(report:dict, resource:str):
     cluster_name = report["ClusterName"]

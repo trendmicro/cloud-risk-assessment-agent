@@ -6,7 +6,12 @@ from typing import Optional, List
 from prettytable import PrettyTable
 import pandas as pd
 
-from src.scan.util import run_command_and_read_output, get_severity, run_command_bg
+from src.scan.util import (
+    run_command_and_read_output,
+    get_severity,
+    run_command_bg,
+    JSONParseError,
+)
 
 IMAGE_REPORT_PATH = "/tmp/trivy_container_full.json"
 DOCKER_HOST = os.environ.get("DOCKER_HOST", "unix:///var/run/docker.sock")
@@ -61,7 +66,7 @@ def read_image_full_report():
         try:
             return json.load(file)
         except json.JSONDecodeError:
-            raise JSONParseError(output_file)
+            raise JSONParseError(IMAGE_REPORT_PATH)
 
 def get_image_summary():
     table = PrettyTable()
