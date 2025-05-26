@@ -5,7 +5,12 @@ from typing import Optional, List
 from prettytable import PrettyTable
 import pandas as pd
 
-from src.scan.util import run_command_and_read_output, get_severity, run_command_bg
+from src.scan.util import (
+    run_command_and_read_output,
+    get_severity,
+    run_command_bg,
+    JSONParseError,
+)
 
 FS_REPORT_PATH = "/tmp/trivy_code_full.json"
 
@@ -60,7 +65,7 @@ def get_filesystem_report():
         try:
             return json.load(file)
         except json.JSONDecodeError:
-            raise JSONParseError(output_file)
+            raise JSONParseError(FS_REPORT_PATH)
 
 
 def get_filesystem_summary_yaml():

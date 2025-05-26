@@ -6,7 +6,7 @@ from typing import Optional, List
 import pandas as pd
 from src.scan.cvss_score import generate_cvss, safe_cvss_score
 
-from src.scan.util import run_command_and_read_output, run_command_bg
+from src.scan.util import run_command_and_read_output, run_command_bg, JSONParseError
 from prettytable import PrettyTable
 AWS_REPORT_PATH = "/tmp/trivy_aws_full.json"
 
@@ -35,7 +35,7 @@ def read_aws_full_report():
         try:
             return json.load(file)
         except json.JSONDecodeError:
-            raise JSONParseError(output_file)
+            raise JSONParseError(AWS_REPORT_PATH)
 
 def aws_short_yaml(report:dict):
     output = ""
