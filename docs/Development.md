@@ -41,4 +41,8 @@ Start the Chainlit application:
 chainlit run src/core/app.py
 ```
 
+The latest version of Chainlit supports the **MCP** tool. Our implementation uses
+it to enrich user queries before the reasoning step. See [MCP Integration](MCP_Comparison.md)
+for more details.
+
 The application should now be running at http://localhost:8000
