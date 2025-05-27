@@ -59,6 +59,14 @@ AWS_SESSION_TOKEN=
 AWS_SECURITY_TOKEN=
 ```
 
+Alternatively you can run the helper script to copy `env.example` and start the service:
+
+```bash
+./scripts/setup.sh
+```
+
+The script verifies prerequisites, creates `.env` if it does not exist, and launches the containerized service.
+
 ### 3. Build & Start Server
 
 To start the server:
