@@ -36,6 +36,14 @@ class NoOutputError(Exception):
         self.message = f"Output file '{filename}' not found. Command may have failed to create it."
         super().__init__(self.message)
 
+class JSONParseError(Exception):
+    """Exception raised when a JSON file cannot be parsed."""
+
+    def __init__(self, filename):
+        self.filename = filename
+        self.message = f"Failed to parse JSON file '{filename}'."
+        super().__init__(self.message)
+
 def run_command_and_read_output(command: list, output_file: str) -> dict:
     subprocess.run(command, check=True)
     if os.path.exists(output_file):

@@ -59,6 +59,14 @@ AWS_SESSION_TOKEN=
 AWS_SECURITY_TOKEN=
 ```
 
+Alternatively you can run the helper script to copy `env.example` and start the service:
+
+```bash
+./scripts/setup.sh
+```
+
+The script verifies prerequisites, creates `.env` if it does not exist, and launches the containerized service.
+
 ### 3. Build & Start Server
 
 To start the server:
@@ -105,6 +113,13 @@ After the scan results are available, access the service at [http://localhost](h
 ## Agent Usage Guide
 
 For more detailed examples and use cases, see our [Usage Guide](chainlit.md).
+
+### MCP Support
+
+The agent now integrates the new **MCP** tool from Chainlit. When available, it
+processes user messages before the reasoning step to enhance responses. Details
+of our implementation and how it differs from Chainlit's built‑in version can be
+found in [MCP Integration](docs/MCP_Comparison.md).
 
 ## License
 
