@@ -1,0 +1,14 @@
+
+You have access to the following tools:
+{tools}
+
+Given the results of the following SQL query and user question, identify the key description that can be utilized in MCP tools. If the SQL query returns multiple items, distribute these items across multiple tools, ensuring the query is limited to retrieving only one specific item per tool. For tools related to semantic search, the input should be precise and not overly broad, and they should retrieve only one specific result at a time.
+
+- User Question: 
+{input}
+
+- SQL query used: 
+{sql_query}
+
+- Scan results: 
+{scan_results}
